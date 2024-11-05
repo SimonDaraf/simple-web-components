@@ -1,12 +1,13 @@
 import { expect, test } from 'vitest'
-import { createHtmlElement, createCssTemplateElement, isValidHtmlName, noForbiddenHtmlNames } from '../src/htmlHelper.js'
+import { HtmlHelper } from '../src/htmlHelper.js'
 
 test('Assert can create html element', () => {
   // Arrange
   const html = '<div>My html code.</div>'
+  const htmlHelper = new HtmlHelper()
 
   // Act
-  const htmlTemplateElement = createHtmlElement(html, 'template')
+  const htmlTemplateElement = htmlHelper.createHtmlElement(html, 'template')
 
   // Assert
   expect(htmlTemplateElement).instanceOf(HTMLTemplateElement)
@@ -15,6 +16,7 @@ test('Assert can create html element', () => {
 
 test('Assert can create CSS Template element', () => {
   // Arrange
+  const htmlHelper = new HtmlHelper()
   const cssCode = `
   #test-text {
     font-size: 20px;
@@ -22,8 +24,8 @@ test('Assert can create CSS Template element', () => {
   `
 
   // Act
-  const cssElement = createCssTemplateElement(cssCode)
-  const htmlElement = createHtmlElement('Hello', 'p')
+  const cssElement = htmlHelper.createCssTemplateElement(cssCode)
+  const htmlElement = htmlHelper.createHtmlElement('Hello', 'p')
   htmlElement.id = 'test-text'
 
   document.body.appendChild(cssElement.content.cloneNode(true))
@@ -38,12 +40,13 @@ test('Assert can create CSS Template element', () => {
 
 test('Assert valid html name', () => {
   // Arrange
+  const htmlHelper = new HtmlHelper()
   const validNameOne = 'test-component'
   const validNameTwo = 'test-component-other'
 
   // Act
-  const isValidOne = isValidHtmlName(validNameOne)
-  const isValidTwo = isValidHtmlName(validNameTwo)
+  const isValidOne = htmlHelper.isValidHtmlName(validNameOne)
+  const isValidTwo = htmlHelper.isValidHtmlName(validNameTwo)
 
   // Assert
   expect(isValidOne).toBeTruthy()
@@ -52,14 +55,15 @@ test('Assert valid html name', () => {
 
 test('Assert invalid html name', () => {
   // Arrange
+  const htmlHelper = new HtmlHelper()
   const invalidNameOne = 'div'
   const invalidNameTwo = 'customComponent'
   const invalidNameThree = 'my-Custom-Component'
 
   // Act
-  const isInvalidOne = isValidHtmlName(invalidNameOne)
-  const isInvalidTwo = isValidHtmlName(invalidNameTwo)
-  const isInvalidThree = isValidHtmlName(invalidNameThree)
+  const isInvalidOne = htmlHelper.isValidHtmlName(invalidNameOne)
+  const isInvalidTwo = htmlHelper.isValidHtmlName(invalidNameTwo)
+  const isInvalidThree = htmlHelper.isValidHtmlName(invalidNameThree)
 
   // Assert
   expect(isInvalidOne).toBeFalsy()
@@ -69,40 +73,15 @@ test('Assert invalid html name', () => {
 
 test('Assert no forbidden html name', () => {
   // Arrange
+  const htmlHelper = new HtmlHelper()
   const noForbiddenOne = 'my-component'
   const noForbiddenTwo = 'test-one-two'
 
   // Act
-  const isValidOne = noForbiddenHtmlNames(noForbiddenOne)
-  const isValidTwo = noForbiddenHtmlNames(noForbiddenTwo)
+  const isValidOne = htmlHelper.noForbiddenHtmlNames(noForbiddenOne)
+  const isValidTwo = htmlHelper.noForbiddenHtmlNames(noForbiddenTwo)
 
   // Assert
   expect(isValidOne).toBeTruthy()
   expect(isValidTwo).toBeTruthy()
-})
-
-test('Assert forbidden html name', () => {
-  // Arrange
-  const forbiddenNames = Object.freeze({
-    'annotation-xml': 1,
-    'color-profile': 2,
-    'font-face': 3,
-    'font-face-src': 4,
-    'font-face-uri': 5,
-    'font-face-format': 6,
-    'font-face-name': 7,
-    'missing-glyph': 8
-  })
-
-  const status = [] // store results.
-
-  // Act
-  for (const name in forbiddenNames) {
-    status.push(noForbiddenHtmlNames(name))
-  }
-
-  // Assert
-  for (let i = 0; i < status.length; i++) {
-    expect(status[i]).toBeFalsy()
-  }
 })

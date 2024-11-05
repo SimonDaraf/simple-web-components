@@ -1,7 +1,7 @@
 import { EventContainer } from './eventContainer.js'
 import { FetchHandler } from './fetchHandler.js'
-import { htmlElementConstructor } from './htmlElementConstructor.js'
-import * as htmlHelper from './htmlHelper.js'
+import { HtmlConstructor } from './htmlElementConstructor.js'
+import { HtmlHelper } from './htmlHelper.js'
 
 /**
  * The Web Component class builds and defines a web component.
@@ -43,6 +43,20 @@ export class WebComponent extends EventTarget {
   #fetchHandler
 
   /**
+   * Provides the html element constructor.
+   *
+   * @type {HtmlConstructor}
+   */
+  #htmlConstructor
+
+  /**
+   * Provides relevant validation methods.
+   *
+   * @type {HtmlHelper}
+   */
+  #validator
+
+  /**
    * Constructs an instance of a Web Component.
    *
    * @param {string} componentName - The component name, needs to follow the html element name syntax.
@@ -51,12 +65,15 @@ export class WebComponent extends EventTarget {
    */
   constructor (componentName, html, css) {
     super()
+    
+    this.#fetchHandler = new FetchHandler()
+    this.#validator = new HtmlHelper()
+    this.#htmlConstructor = new HtmlConstructor()
+    this.#registeredEvents = []
+
     this.#setComponentName(componentName)
     this.#setHtml(html)
     this.#setCss(css)
-
-    this.#fetchHandler = new FetchHandler()
-    this.#registeredEvents = []
   }
 
   /**
@@ -69,10 +86,10 @@ export class WebComponent extends EventTarget {
     if (typeof (newComponentName) !== 'string') {
       throw new Error('Invalid type of component name, expected type: string')
     }
-    if (!htmlHelper.isValidHtmlName(newComponentName)) {
+    if (!this.#validator.isValidHtmlName(newComponentName)) {
       throw new Error(`Component name: ${newComponentName} does not match naming convention: [a-z]-[a-z](-[a-z])*`)
     }
-    if (!htmlHelper.noForbiddenHtmlNames(newComponentName)) {
+    if (!this.#validator.noForbiddenHtmlNames(newComponentName)) {
       throw new Error(`Component name: ${newComponentName} is a forbidden component name!`)
     }
 
@@ -86,9 +103,7 @@ export class WebComponent extends EventTarget {
    * @param {HTMLTemplateElement|string|URL} newHtml - The new HTMLTemplateElement | string | URL.
    */
   #setHtml (newHtml) {
-    if (!(newHtml instanceof HTMLTemplateElement) &&
-        !(newHtml instanceof URL) &&
-        typeof (newHtml) !== 'string') {
+    if (!this.#validator.isValidHtmlAccessor(newHtml)) {
       throw new Error('Invalid type of html, expected type: HTMLTemplateElement, string or URL')
     }
 
@@ -102,9 +117,7 @@ export class WebComponent extends EventTarget {
    * @param {HTMLTemplateElement|string|URL} newCss - The new HTMLTemplateElement | string | URL.
    */
   #setCss (newCss) {
-    if (!(newCss instanceof HTMLTemplateElement) &&
-        !(newCss instanceof URL) &&
-        typeof (newCss) !== 'string') {
+    if (!this.#validator.isValidHtmlAccessor(newCss)) {
       throw new Error('Invalid type of css, expected type: HTMLTemplateElement, string or URL')
     }
 
@@ -133,7 +146,7 @@ export class WebComponent extends EventTarget {
         Accept: 'text/html'
       }
     })
-    this.#html = htmlHelper.createHtmlElement(htmlCode, 'template')
+    this.#html = this.#validator.createHtmlElement(htmlCode, 'template')
   }
 
   /**
@@ -148,7 +161,7 @@ export class WebComponent extends EventTarget {
         Accept: 'text/css'
       }
     })
-    this.#css = htmlHelper.createCssTemplateElement(cssCode)
+    this.#css = this.#validator.createCssTemplateElement(cssCode)
   }
 
   /**
@@ -174,6 +187,6 @@ export class WebComponent extends EventTarget {
       await this.#loadCssTemplate(this.#css)
     }
 
-    htmlElementConstructor(this.#componentName, this.#html, this.#css, this.#registeredEvents)
+    this.#htmlConstructor.htmlElementConstructor(this.#componentName, this.#html, this.#css, this.#registeredEvents)
   }
 }

@@ -1,60 +1,79 @@
 /**
- * Creates a HTML element from specified type with supplied HTML code.
- *
- * WARNING : Make sure you know the contents of the HTML code. The recommended
- * implementation is to use this with local HTML code and not with
- * random html code supplied from elsewhere!
- *
- * @param {string} htmlCode - The HTML code.
- * @param {string} elementType - The element type.
- * @returns {HTMLElement} - The created HTML element.
+ * Utility class containing tailored html methods.
  */
-export const createHtmlElement = function (htmlCode, elementType) {
-  const element = document.createElement(elementType)
-  element.innerHTML = htmlCode
-  return element
-}
-
-/**
- * Creates a HTMLTemplate element and wraps the css code in a HTML style tag.
- *
- * @param {string} cssCode - The CSS code.
- * @returns {HTMLTemplateElement} - The css template element.
- */
-export const createCssTemplateElement = function (cssCode) {
-  const element = document.createElement('template')
-  element.innerHTML = `<style> ${cssCode} </style>`
-  return element
-}
-
-/**
- * Verifies if the given name is a valid html name.
- *
- * @param {string} componentName - The name to validate.
- * @returns {boolean} - An indication whether the name is valid.
- */
-export const isValidHtmlName = function (componentName) {
-  // Validate html naming convention
-  if (!(/[a-z]-[a-z](-[a-z])*/.test(componentName))) {
-    return false
+export class HtmlHelper {
+  /**
+   * Creates a HTML element from specified type with supplied HTML code.
+   *
+   * WARNING : Make sure you know the contents of the HTML code. The recommended
+   * implementation is to use this with local HTML code and not with
+   * random html code supplied from elsewhere!
+   *
+   * @param {string} htmlCode - The HTML code.
+   * @param {string} elementType - The element type.
+   * @returns {HTMLElement} - The created HTML element.
+   */
+  createHtmlElement (htmlCode, elementType) {
+    const element = document.createElement(elementType)
+    element.innerHTML = htmlCode
+    return element
   }
-  return true
-}
 
-/**
- * Verifies that the given name is not any of the forbidden names declared by.
- *
- * @see {@link https://html.spec.whatwg.org/multipage/custom-elements.html#valid-custom-element-name}
- * @param {string} componentName - The name to validate.
- * @returns {boolean} - If name is not one of the forbidden names.
- */
-export const noForbiddenHtmlNames = function (componentName) {
-  for (const name in forbiddenNames) {
-    if (componentName === name) {
+  /**
+   * Creates a HTMLTemplate element and wraps the css code in a HTML style tag.
+   *
+   * @param {string} cssCode - The CSS code.
+   * @returns {HTMLTemplateElement} - The css template element.
+   */
+  createCssTemplateElement (cssCode) {
+    const element = document.createElement('template')
+    element.innerHTML = `<style> ${cssCode} </style>`
+    return element
+  }
+
+  /**
+   * Verifies if the given name is a valid html name.
+   *
+   * @param {string} componentName - The name to validate.
+   * @returns {boolean} - An indication whether the name is valid.
+   */
+  isValidHtmlName (componentName) {
+    // Validate html naming convention
+    if (!(/[a-z]-[a-z](-[a-z])*/.test(componentName))) {
       return false
     }
+    return true
   }
-  return true
+
+  /**
+   * Verifies if the accessor is either a HtmlTemplateElement, URL or string.
+   *
+   * @param {HTMLTemplateElement|string|URL}
+   */
+  isValidHtmlAccessor (accessor) {
+    if (!(accessor instanceof HTMLTemplateElement) &&
+        !(accessor instanceof URL) &&
+        typeof (accessor) !== 'string') {
+      return false
+    }
+    return true
+  }
+
+  /**
+   * Verifies that the given name is not any of the forbidden names declared by.
+   *
+   * @see {@link https://html.spec.whatwg.org/multipage/custom-elements.html#valid-custom-element-name}
+   * @param {string} componentName - The name to validate.
+   * @returns {boolean} - If name is not one of the forbidden names.
+   */
+  noForbiddenHtmlNames (componentName) {
+    for (const name in forbiddenNames) {
+      if (componentName === name) {
+        return false
+      }
+    }
+    return true
+  }
 }
 
 /**
